@@ -85,7 +85,7 @@ public class LLMDecisionAction implements Action<AgentInput> {
     private String buildPrompt(List<Message> history, String toolsSchema) {
         StringBuilder sb = new StringBuilder();
 
-        // 1. 系统指令
+        // 1. 系统指令111
         sb.append("你是一个智能助手，可以调用以下工具来完成用户任务。\n");
         sb.append("请按照以下格式输出你的思考和行动：\n");
         sb.append("Thought: 你对当前情况的思考\n");
