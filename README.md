@@ -19,11 +19,11 @@ agentdemo/
 
 ├── agent-gateway/ # API网关（限流、熔断、路由、TraceId）
 
-└── agent-mcp/ # MCP客户端集成（动态工具发现与调用）
+└── mcp/ # MCP客户端集成（动态工具发现与调用）
 
 **依赖关系**：
 - `agent-service` → `agent-core`
-- `agent-mcp` → `agent-core`
+- `mcp` → `agent-core`
 - `agent-gateway` 独立，通过 HTTP 转发请求到 `agent-service`
 
 **数据流简图**：
@@ -65,7 +65,7 @@ Tool / MCP（执行动作）
 - **TraceId 生成与透传**：自动生成或继承上游 ID，写入 MDC 并向下游传递。
 - **Prometheus 指标**：预留 `/actuator/prometheus` 端点 (暂未显示集成，仅加入了依赖)
 
-### ✅ MCP 集成（agent-mcp）
+### ✅ MCP 集成（mcp）
 
 - **MCP 客户端**：基于 WebClient + JSON-RPC 2.0，支持 `tools/list` 和 `tools/call`。
 - **动态工具注册**：启动时从 MCP Server 拉取工具列表，自动创建 `McpToolAdapter` 并注册到 `ToolRegistry`。
@@ -184,7 +184,7 @@ controller：AgentController
 
 store：RedisWorkflowStateStore（可选）
 
-agent-mcp
+mcp
 client：McpClient（HTTP JSON-RPC）、McpClientConfig
 
 tool：McpToolAdapter、McpToolRegistry（CommandLineRunner）
