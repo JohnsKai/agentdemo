@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: agentservice
+server:
+  port: 8081
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - [%X{traceId}] %msg%n"
+
+agent:
+  llm:
+    provider: mock   # 可选 mock, deepseek, openai
+    deepseek:
+      api-key: your-key
+      endpoint: https://api.deepseek.com/v1/chat/completions

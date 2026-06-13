@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds" debug="false">
+    <!-- 保留 Spring Boot 默认的控制台输出格式，并增加 TraceId -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <!-- 自定义日志格式：时间 线程 级别 Logger - [TraceId] 消息 -->
+    <property name="CONSOLE_LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - [%X{traceId}] %msg%n"/>
+    <property name="FILE_LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - [%X{traceId}] %msg%n"/>
+
+    <!-- 生产环境日志目录（可通过 JVM 参数覆盖：-DLOG_PATH=/var/log） -->
+    <property name="LOG_PATH" value="${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/agent-logs}"/>
+
+    <!-- 1. 控制台 Appender（非生产可保留，便于排查） -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 2. 滚动文件 Appender（每天滚动，保留30天，超过总大小限制则删除） -->
+    <appender name="ROLLING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/agent-gateway.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 按天滚动，文件名模式 -->
+            <fileNamePattern>${LOG_PATH}/agent-service.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <!-- 每个日志文件最大 1GB -->
+            <maxFileSize>1GB</maxFileSize>
+            <!-- 保留 30 天 -->
+            <maxHistory>30</maxHistory>
+            <!-- 总日志文件大小上限 20GB，超出后删除最旧的 -->
+            <totalSizeCap>20GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <!-- 安全：避免多个 JVM 写入同一文件（生产建议每个实例写独立文件） -->
+        <prudent>false</prudent>
+    </appender>
+
+    <!-- 3. 异步 Appender（提高性能，防止日志写阻塞业务线程） -->
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- 默认队列大小 256，可根据并发调整 -->
+        <queueSize>512</queueSize>
+        <!-- 丢弃日志的阈值，队列剩余容量低于该值时 INFO 及以下日志丢弃，保留 WARN/ERROR -->
+        <discardingThreshold>0</discardingThreshold>
+        <!-- 是否在应用关闭时等待日志刷出 -->
+        <neverBlock>true</neverBlock>
+        <!-- 引用滚动文件 Appender -->
+        <appender-ref ref="ROLLING_FILE"/>
+    </appender>
+
+    <!-- 生产环境根 Logger 配置：输出 INFO 级别及以上，同时输出到控制台和异步文件 -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="ASYNC"/>
+    </root>
+
+    <!-- 可选：针对某些包降低日志级别，例如 Spring Security、Netty -->
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.springframework.cloud.gateway" level="INFO"/>
+    <logger name="reactor.netty" level="WARN"/>
+    <logger name="com.alibaba.csp.sentinel" level="INFO"/>
+
+    <!-- 可选：将业务包日志级别设为 DEBUG（通过 springProfile 按环境启用） -->
+    <springProfile name="dev">
+        <logger name="com.study.agent" level="DEBUG"/>
+        <root level="INFO"/>
+    </springProfile>
+
+    <springProfile name="prod">
+        <logger name="com.study.agent" level="INFO"/>
+        <root level="WARN"/>
+    </springProfile>
+</configuration>

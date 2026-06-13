@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      routes:
+        - id: agentservice # 路由 ID，也是 Sentinel 中的一个资源名
+          uri: http://localhost:8081 # 指向你的 Agent 服务 (可以是服务发现地址)
+          predicates:
+            - Path=/api/agent/** # 匹配 /api/agent/ 开头的请求
+server:
+  port: 9000

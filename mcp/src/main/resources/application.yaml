@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: mcp
+agent:
+  mcp:
+    enabled: true
+    server-url: http://localhost:3000   # ?? MCP Server ??
+    timeout-seconds: 30
