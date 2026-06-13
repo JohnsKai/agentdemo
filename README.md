@@ -2,9 +2,9 @@
 
 ## 项目简介
 
-本项目是一个**生产级、可扩展的智能体（Agent）服务平台**，基于 Java 17 + Spring Boot 2.7.x + Project Reactor 构建。它实现了 ReAct（推理-行动）模式的工作流引擎，支持工具调用、人类反馈（Human-in-the-loop）、MCP（Model Context Protocol）协议集成，并提供了 API 网关、限流熔断、全链路追踪等微服务治理能力。
+本项目是一个**可扩展的智能体（Agent）服务平台**，基于 Java 17 + Spring Boot 2.7.x + Project Reactor 构建。它实现了 ReAct（推理-行动）模式的工作流引擎，支持工具调用、MCP（Model Context Protocol）协议集成，并提供了 API 网关、限流熔断、全链路追踪等微服务治理能力。
 
-**核心价值**：让开发者能够快速构建自主决策、可交互、可观测的企业级 AI 智能体应用。
+**核心价值**：让开发者能够快速构建自主决策、可观测的AI 智能体应用。
 
 ---
 
@@ -54,7 +54,7 @@ Tool / MCP（执行动作）
 
 - **LLM 决策**：`LLMDecisionAction` 调用 LLM（支持 Mock / DeepSeek / OpenAI），解析 `thought` 和 `action`。
 - **工具调用**：`ToolCallAction` 通过 `ToolRegistry` 执行本地或远程工具，支持用户确认。
-- **人类交互**：`ask_user` 动作使工作流挂起，等待外部输入后恢复。
+- **人类交互**：`ask_user` 动作使工作流挂起，等待外部输入后恢复。(待验证)
 - **REST API**：`/chat`（开始会话）、`/resume/{waitKey}`（恢复等待）。
 - **全链路追踪**：通过 `X-Trace-Id` 头透传，日志自动关联。
 
@@ -104,7 +104,7 @@ curl -X POST http://localhost:8081/api/agent/chat \
 ```bash
 java -jar agent-gateway/target/agent-gateway-1.0.0.jar
 
-默认端口：9000
+默认端口9000
 网关会将 /api/agent/** 路由到 http://localhost:8081
 ```
 
@@ -139,7 +139,7 @@ spring:
 public class MyTool implements Tool {
     @Override public String getName() { return "my_tool"; }
     @Override public String getDescription() { return "我的自定义工具"; }
-    @Override public Map<String, Object> getParametersSchema() { return Map.of(...); }
+    @Override public Map<String, Object> getParametersSchema() { return Map.of(...) };
     @Override public boolean requiresConfirmation() { return false; }
     @Override public Mono<Object> execute(Map<String, Object> args) {
         return Mono.just("执行结果");
